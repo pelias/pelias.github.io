@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pelias</title>
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+    <link href='https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic|Roboto+Slab:400,700|Inconsolata:400,700&subset=latin,cyrillic' rel='stylesheet' type='text/css'>
+
+    <link rel="stylesheet" href="http://pelias.github.io/pelias/css/theme.css" type="text/css"/>
+    <link rel="stylesheet" href="http://pelias.github.io/pelias/css/theme-fixes.css" type="text/css"/>
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/github.min.css">
+
+    <link href="//fonts.googleapis.com/css?family=Open+Sans:300,400" rel="stylesheet">
+    <link href="http://pelias.github.io/pelias/css/tipuesearch.css" rel="stylesheet">
+
+    
+</head>
+<body class="wy-body-for-nav">
+
+    <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+            <div class="wy-side-nav-search">
+                <a href="http://pelias.github.io/pelias/"><i class="fa fa-home"></i> Pelias</a>
+            </div>
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                
+                                
+                                                                                                                
+                                            <p class="menu-section">
+                            
+                        </p>
+
+                        <ul class="nav nav-pills nav-stacked">
+                                                            <li class="navitems">
+                                    <a href="http://pelias.github.io/pelias/index.html">
+                                        Overview
+                                    </a>
+                                </li>
+                                                            <li class="navitems">
+                                    <a href="http://pelias.github.io/pelias/install.html">
+                                        Getting Started
+                                    </a>
+                                </li>
+                                                            <li class="navitems">
+                                    <a href="http://pelias.github.io/pelias/data_licenses.html">
+                                        License
+                                    </a>
+                                </li>
+                                                            <li class="navitems">
+                                    <a href="http://pelias.github.io/pelias/code_of_conduct.html">
+                                        Code of Conduct
+                                    </a>
+                                </li>
+                                                            <li class="navitems">
+                                    <a href="http://pelias.github.io/pelias/contributing.html">
+                                        Contribute
+                                    </a>
+                                </li>
+                                                    </ul>
+                                            <p class="menu-section">
+                            #Goals
+                        </p>
+
+                        <ul class="nav nav-pills nav-stacked">
+                                                            <li class="navitems">
+                                    <a href="http://pelias.github.io/pelias/quarterly_goals">
+                                        Q3-2016 Milestones
+                                    </a>
+                                </li>
+                                                            <li class="navitems">
+                                    <a href="http://pelias.github.io/pelias/quarterly_goals/q2-2016.html">
+                                        Q2-2016 Milestones
+                                    </a>
+                                </li>
+                                                            <li class="navitems">
+                                    <a href="http://pelias.github.io/pelias/milestones/libpostal_integration">
+                                        Address Parsing w/ libpostal
+                                    </a>
+                                </li>
+                                                            <li class="navitems">
+                                    <a href="http://pelias.github.io/pelias/milestones/interpolation">
+                                        Interpolation
+                                    </a>
+                                </li>
+                                                            <li class="navitems">
+                                    <a href="http://pelias.github.io/pelias/milestones/wof_venues_import">
+                                        WOF Venues Import
+                                    </a>
+                                </li>
+                                                            <li class="navitems">
+                                    <a href="http://pelias.github.io/pelias/milestones/community_building">
+                                        Community Building
+                                    </a>
+                                </li>
+                                                            <li class="navitems">
+                                    <a href="http://pelias.github.io/pelias/milestones/categories">
+                                        Category Support
+                                    </a>
+                                </li>
+                                                    </ul>
+                                                </div>
+            &nbsp;
+        </nav>
+
+        <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                        <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+                <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+                <a href="http://pelias.github.io/pelias/">Pelias</a>
+            </nav>
+
+
+                        
+            <div class="wy-nav-content">
+                <div class="rst-content">
+                    <div role="main" class="document">
+                        <h1 id="libpostal-integration">Libpostal Integration</h1>
+<p>The libpostal integration is not just replacing addressit with libpostal for 1-box text analysis, it changes the way we do searches.  Until now, we’ve not been operating as a geocoder but more as search engine of terms that just so happen to be geo-related.  These changes were technically possible while still using addressit but it’s response was difficult to parse in a reliable way so it didn’t make sense to jump thru hoops to make it work.  With libpostal, we can now more confidently identify the parts of the input and make decisions about how elasticsearch should be searched to make Pelias behave more like a geocoder.  </p>
+<p>This document describes the concepts of how to query ES, the affected pieces of the pelias architecture, and future work.  </p>
+<h2 id="queries">Queries</h2>
+<p>I started 2 new Query modules in the query package to handle the (so far) 2 different strategies for dealing with analyzed text.  There will most certainly be refinements to these queries and/or new queries added.  I would prefer to keep distinct behaviors as separate modules rather than build one monolithic Query module to rule all the things.  </p>
+<h3 id="fallback-query">Fallback Query</h3>
+<p><strong>tl;dr - fallback to less granular administrative areas when inputs don't match</strong></p>
+<p>When a user enters a single piece of text that contains a hierarchy of data, we can’t be confident that what the user entered is spelled correctly or even makes sense.  Ideally the user isn’t a drunken narcoleptic, for example:</p>
+<p><code>30 West 26th Street, New York, NY</code></p>
+<p>We look at the input and know that it makes sense.  libpostal parses this input as:</p>
+<pre><code>{
+  "house_number": "30",
+  "road": "west 26th street",
+  "city": "new york",
+  "state": "ny"
+}</code></pre>
+<p>Searching ES for this analyzed input returns a single result (ideally, OA and OSM may have the same record).  However, a user could also input:</p>
+<p><code>1220 Calle De Lago, Seattle, Minnesota, France</code></p>
+<p>libpostal dutifully parses this as:</p>
+<pre><code>{
+  "house_number": "1220",
+  "road": "calle de lago",
+  "city": "seattle",
+  "state": "minnesota”,
+  "country": "france"
+}</code></pre>
+<p>In this example, none of the house_number+road, city, state, and country match.  While technically this is a correct parsing, there is no address 1220 Calle de Lago in Seattle, nor is there a Seattle in Minnesota, and lastly there is no state or region of France called Minnesota.  Nevertheless, this is what the user entered so we must try to make some sense of it.  I covered a lot of this in <a href="https://mapzen.com/blog/geocoding-places/">https://mapzen.com/blog/geocoding-places/</a>.  </p>
+<p>In this last example, the idea is to query for everything returned by libpostal:  house number, street, city, state, and country.  Because that combination may not have a match, simultaneously query for all the fields except the most granular:  city, state, and country.  You can probably see where this is going but because the city, state, and country combination may not be valid, also query ES for state and country and finally just country.  In this particular case, none of the combinations make sense so only the query for France would return anything.  </p>
+<p>In the ideal case where all the fields combined make sense, as in <code>30 West 26th Street, New York, NY</code>, there be an address result, a city result, and a state result.  The API can later make decisions on which results to keep.  </p>
+<p>This is the essence of the fallback query:  find the different combinations of analyzed text parts that make sense (not literally all combinations).  </p>
+<p>The introduction of query and category terms complicate this a bit, as in the example <code>pizza 30 west 26th street, new york, ny</code>.  Until we have a 2-stage ES query that would first resolve the location terms then search for the query terms in the context of the geocoded location terms, the fallback query will first attempt to search for pizza in New York, NY then have all the other fallbacks in place in case the query+non-street location terms fails.  </p>
+<ul>
+<li>pizza in New York, NY</li>
+<li>30 West 26th Street, New York, NY</li>
+<li>New York, NY</li>
+<li>NY</li>
+</ul>
+<p>We have to search for pizza in New York, NY excluding the house number + street because if those terms were included then we would be searching for pizza venues that are only at 30 West 26th Street in New York, NY (there aren’t any until Randy convinces SRA to start one).  If there are no venues containing the word “pizza”, then the search would fallback to searching for the address and then to higher administrative areas.  </p>
+<h3 id="geodisambiguation-queries">Geodisambiguation Queries</h3>
+<p><strong>tl;dr - libpostal only returns 1 interpretation so we have to compensate</strong></p>
+<p>One limitation of libpostal is that it returns a single result for any input.  I’ve talked about this before but Luxembourg isn’t just the name of a country, it’s also the name of a region in both Luxembourg and Belgium, and also the name of a locality in Luxembourg.  Here’s what libpostal does with Luxembourg:</p>
+<pre><code>&gt; luxembourg
+
+Result:
+
+{
+  "country": "luxembourg"
+}</code></pre>
+<p>libpostal returns just a single interpretation of the term Luxembourg, so it’s up to us to compensate.  </p>
+<p>In the case where libpostal returns just a single administrative area field and no other fields, the GeodisambiguationQuery is used to query across all supported administrative area fields.  For Luxembourg, the GeodisambiguationQuery queries ES at the following layers:</p>
+<ul>
+<li>neighborhood</li>
+<li>borough</li>
+<li>locality</li>
+<li>localadmin</li>
+<li>county</li>
+<li>macrocounty</li>
+<li>region</li>
+<li>macroregion</li>
+<li>country</li>
+</ul>
+<p>This is needed because there’s no way to know which layers will be a match. </p>
+<p>Some other examples are Lancaster (a locality and county in Pennsylvania) and Ontario (a city in California and a region of Canada).  </p>
+<p>The GeodisambiguationQuery allows us to compensate for libpostal single result limitation by querying across multiple fields at once.  </p>
+<h2 id="projects-effected">Projects Effected</h2>
+<p>So far, the libpostal integration has affected the following packages:</p>
+<ul>
+<li>text-analyzer</li>
+<li>query</li>
+<li>api</li>
+</ul>
+<p>All of these project modifications have been made with incremental updates in mind.  That is, text-analyzer and query changes were made to not require API updates for merge to master.  </p>
+<h3 id="the-text-analyzer-project">The text-analyzer project</h3>
+<p>The text-analyzer package changes are pretty simple, it just exposes a new analyzer that calls libpostal and adapts the response to the internal Pelias format.  To avoid having several projects change all at once, i modified the main entry point to look at the <code>api.textAnalyzer</code> value of Pelias config.  </p>
+<h3 id="the-query-project">The query project</h3>
+<p>The changes I’ve made to the query project so far are just the implementations of the 2 Query modules and their exports.  I’ve not modified FilteredBooleanQuery.  </p>
+<h3 id="api">API</h3>
+<p>Since the text-analyzer selection is now environment driven, changes to the API are in 2 places:  <code>query/view/search.js</code> for figuring out which query to call and in post processing.  </p>
+<h4 id="querying">Querying</h4>
+<p>I discussed the types of queries above so the changes to <code>query/view/search.js</code> are business logic to choose which Query module to use.  I’ve commented out a good chunk of the scoring/weighting logic in order to just get queries to run with the required fields.  The logic for query selection is very basic in that if libpostal returned a single coarse field and nothing else, GeodisambiguationQuery is used, otherwise FallbackQuery is.  </p>
+<h4 id="post-processing">Post-processing</h4>
+<p>So far I’ve identified 2 post-query  processing steps:</p>
+<ul>
+<li>result trimming</li>
+<li>deduplication</li>
+</ul>
+<h5 id="result-trimming">Result Trimming</h5>
+<p>FallbackQuery issues range (not in the ES sense) queries to match less granular inputs in addition to the most granular input.  Therefore a post-processing function to remove all but the most granular results.  For example, the input “Lancaster, PA, USA” will search for:</p>
+<ul>
+<li>locality=Lancaster, region=PA, and country=USA</li>
+<li>region=PA and country=USA</li>
+<li>country=USA</li>
+</ul>
+<p>The fallback is required in case there’s no city named Lancaster in Pennsylvania.  There is, however, so the locality record is the most granular and all other results should be removed.  The current state of the function is to check-for-existence and remove-less-granular in this order:</p>
+<ul>
+<li>venue</li>
+<li>address</li>
+<li>neighbourhood</li>
+<li>locality / localadmin</li>
+<li>county / macrocounty</li>
+<li>region / macroregion</li>
+<li>country</li>
+</ul>
+<p>There’s a nuance and vagueness (what the French call “I don’t know what”) to the differentiation between locality and localadmin that users (or us for that matter) may not understand or appreciate so they should probably be treated as equivalent.  </p>
+<p>This result trimming should probably only be applied for FallbackQuery instances since the whole idea of GeodisambiguationQuery is to search across all coarse layers.  </p>
+<h5 id="deduplication">Deduplication</h5>
+<p>I haven’t explored it fully to understand the reasons why but <code>middlware/dedupe.js</code> is overly greedy in removing results.  For example, when searching for “Socorro” I would expect to see Socorro, NM in the results but it’s being deduce’d away.  I think this because geonames records with admin-lookup creates records that are substantially equivalent.  </p>
+<h2 id="outstanding-work">Outstanding Work</h2>
+<p><strong>tl;dr - we have a lot of work to do</strong></p>
+<p>This section serves to start discussions on what is known knowns and known unknowns that we'll have to tackle at some point.  </p>
+<h3 id="exact-matches">Exact Matches</h3>
+<p>This is probably my own lack of understanding of how ES works, but we’ll need to find a way to query for exact values, and potentially spelling corrections.  For example, if I search for <code>Red Lion, PA</code>, I get 2 results back:</p>
+<ul>
+<li>Red Lion, PA</li>
+<li>Red Hill, PA</li>
+</ul>
+<p>Even though I specified locality=Red Lion in my ES query, it still returned other values that didn’t match exactly.  </p>
+<h3 id="shared-node-postal-instance">Shared node-postal instance</h3>
+<p>Our API is multicore as defined in <code>api/index.js</code>.  When I start the API in multicore mode, it slows down very quickly as it attempts to start multiple instances of libpostal.  I turned off multicore mode in order to start only a single libpostal instance, this won’t be a good solution in production.  I’ll need someone with advanced node knowledge to share a single libpostal instance.  Perhaps a microservice could solve this problem?  </p>
+<h3 id="special-case-queries">Special Case Queries</h3>
+<p>There are a fairly small number of cases where the limitation of libpostal only returning 1 thing can lead to situations where the GeodisambiguationQuery doesn’t do what we’ll need.  The best example of this is for the input “Ontario, CA”, which could be interpreted as both city/state and province/country.  We’ll need to modify one of the existing Query modules or write a new one that accounts for this and perform some detection in <code>query/view/search.js</code>.  </p>
+<h3 id="venue-proximity-search">Venue Proximity Search</h3>
+<p>Currently, FallbackQuery just searches for things that match on the terms, there’s no consideration made for proximity search.  For example, if a user enters “pizza, 1090 North Charlotte St, Lancaster, PA”, FallbackQuery disregards the address and searches for pizza venues that have city=Lancaster and state=PA.  This is equivalent to “pizza, Lancaster, PA”.  There’s no consideration of proximity or outside of the supplied city.  If the user enters, for example, “Pizza, Windsor, PA” where the city might have one pizza shop (or worse, none), we’d discount venues in neighboring towns which is mere miles away.  This becomes more evident when it’s not a universal term like “pizza” but something more abstract like “cowork spaces” where it’s very likely that the entered city may not contain anything but surrounding cities do.   </p>
+<h3 id="ambiguous-search">Ambiguous Search</h3>
+<p>Even with proximity search enabled, if a user enters “Pizza Lancaster”, we’ll need to know which “Lancaster” the user was referring to.  There are 2 ways to approach this:</p>
+<ol>
+<li>don’t search until the user has made a selection</li>
+<li>sort the geoambiguities and perform a search on the most likely (highest ranked) result</li>
+</ol>
+<p>In the case of Lancaster (without any additional contextual hints), Lancaster, PA will be the most likely result since it’s the largest city named Lancaster.  We will most likely need a new section of our response that lists the geoambiguities and the venue search results with the implicit understanding that the venue results are from the first in the geoambiguities list.  By returning both the venues and geoambiguities, we give clients the ability to present “did you mean?” functionality to users.  More broadly, doing a 2-stage geocode-then-search will resolve the case where the user enters an ambiguous location.  </p>
+<h3 id="suburb-or-city">Suburb or City?</h3>
+<p>Due to OSM model issues, sometimes what we normally consider a city is identified by libpostal as a suburb which we treat as a neighborhood.  Normally treating a suburb as a neighborhood is a good thing as in:</p>
+<pre><code>&gt; east village, new york city, ny
+
+Result:
+
+{
+  "suburb": "east village",
+  "city": "new york city",
+  "state": "ny"
+}</code></pre>
+<p>However, sometimes this isn’t correct, as in:</p>
+<pre><code>&gt; santa monica, california
+
+Result:
+
+{
+  "suburb": "santa monica",
+  "state": "california"
+}</code></pre>
+<p>Interestingly, libpostal gets it correct when the state is abbreviated:</p>
+<pre><code>&gt; santa monica, ca
+
+Result:
+
+{
+  "city": "santa monica",
+  "state": "ca"
+}</code></pre>
+<p>Al says this is fixable but I’m quite certain that it won’t get them all and there may be other instances where a coarse value could legitimately be something else so having the ability to handle that is important. </p>
+<h3 id="spell-corrections">Spell Corrections</h3>
+<p>libpostal currently has limited ability to detect slight misspellings, though that might be an affect of OSM contributors not being able to spell rather than intentional behavior of libpostal.  For example:</p>
+<pre><code>&gt; socoro, nm
+
+Result:
+
+{
+  "city": "socoro",
+  "state": "nm"
+}</code></pre>
+<p>We'll have to enable some sort of spelling correction behavior in ES to take advantage of this.  This is important behavior for 5-box inputs that aren't analyzed so hopefully it can come along for the ride.  Until this is implemented the FallbackQuery will just fallback to New Mexico state but at least we don't fail catastrophically.  </p>
+                    </div>
+
+                    <hr/>
+                    <div class="blue-alert">
+                            <div style="float: left; padding-right: 10px">
+                                <i class="fa fa-exclamation-triangle fa-3x"></i>
+                            </div>
+                            <div style="float: left;">
+                            <strong>
+                                See an error in this documentation?
+                            </strong>
+                            <br>Kindly submit a pull request to <a href="https://github.com/pelias/pelias">Pelias</a> or open an issue <a href="https://github.com/pelias/pelias/issues">here</a> and we'll fix it.
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+
+
+
+                    <footer>
+                        <small>
+                            <a href="http://pelias.io">Pelias</a> is a free open source project by <a href="https://mapzen.com">Mapzen</a>. This documentation was built using <a href="http://couscous.io/">Couscous</a> using a <a href="https://github.com/CouscousPHP/Template-ReadTheDocs">theme</a> inspired by <a href="https://readthedocs.org/">Read the Docs</a> and further enhanced by <a href="https://github.com/snipe/snipe-it/tree/documentation">Snipe-IT</a>.
+                        </small>
+                    </footer>
+
+                </div>
+            </div>
+
+        </section>
+
+    </div>
+
+    <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/highlight.min.js"></script>
+    <script src="http://pelias.github.io/pelias/js/theme.js"></script>
+    <script type="text/javascript" src="http://pelias.github.io/pelias/js/generated-toc.js">
+
+    <script>
+        $(function() {
+            // Syntax highlighting
+            hljs.initHighlightingOnLoad();
+        });
+    </script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+
+    
+
+
+
+</body>
+</html>

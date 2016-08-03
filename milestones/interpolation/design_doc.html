@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pelias</title>
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+    <link href='https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic|Roboto+Slab:400,700|Inconsolata:400,700&subset=latin,cyrillic' rel='stylesheet' type='text/css'>
+
+    <link rel="stylesheet" href="http://pelias.github.io/pelias/css/theme.css" type="text/css"/>
+    <link rel="stylesheet" href="http://pelias.github.io/pelias/css/theme-fixes.css" type="text/css"/>
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/github.min.css">
+
+    <link href="//fonts.googleapis.com/css?family=Open+Sans:300,400" rel="stylesheet">
+    <link href="http://pelias.github.io/pelias/css/tipuesearch.css" rel="stylesheet">
+
+    
+</head>
+<body class="wy-body-for-nav">
+
+    <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+            <div class="wy-side-nav-search">
+                <a href="http://pelias.github.io/pelias/"><i class="fa fa-home"></i> Pelias</a>
+            </div>
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                
+                                
+                                                                                                                
+                                            <p class="menu-section">
+                            
+                        </p>
+
+                        <ul class="nav nav-pills nav-stacked">
+                                                            <li class="navitems">
+                                    <a href="http://pelias.github.io/pelias/index.html">
+                                        Overview
+                                    </a>
+                                </li>
+                                                            <li class="navitems">
+                                    <a href="http://pelias.github.io/pelias/install.html">
+                                        Getting Started
+                                    </a>
+                                </li>
+                                                            <li class="navitems">
+                                    <a href="http://pelias.github.io/pelias/data_licenses.html">
+                                        License
+                                    </a>
+                                </li>
+                                                            <li class="navitems">
+                                    <a href="http://pelias.github.io/pelias/code_of_conduct.html">
+                                        Code of Conduct
+                                    </a>
+                                </li>
+                                                            <li class="navitems">
+                                    <a href="http://pelias.github.io/pelias/contributing.html">
+                                        Contribute
+                                    </a>
+                                </li>
+                                                    </ul>
+                                            <p class="menu-section">
+                            #Goals
+                        </p>
+
+                        <ul class="nav nav-pills nav-stacked">
+                                                            <li class="navitems">
+                                    <a href="http://pelias.github.io/pelias/quarterly_goals">
+                                        Q3-2016 Milestones
+                                    </a>
+                                </li>
+                                                            <li class="navitems">
+                                    <a href="http://pelias.github.io/pelias/quarterly_goals/q2-2016.html">
+                                        Q2-2016 Milestones
+                                    </a>
+                                </li>
+                                                            <li class="navitems">
+                                    <a href="http://pelias.github.io/pelias/milestones/libpostal_integration">
+                                        Address Parsing w/ libpostal
+                                    </a>
+                                </li>
+                                                            <li class="navitems">
+                                    <a href="http://pelias.github.io/pelias/milestones/interpolation">
+                                        Interpolation
+                                    </a>
+                                </li>
+                                                            <li class="navitems">
+                                    <a href="http://pelias.github.io/pelias/milestones/wof_venues_import">
+                                        WOF Venues Import
+                                    </a>
+                                </li>
+                                                            <li class="navitems">
+                                    <a href="http://pelias.github.io/pelias/milestones/community_building">
+                                        Community Building
+                                    </a>
+                                </li>
+                                                            <li class="navitems">
+                                    <a href="http://pelias.github.io/pelias/milestones/categories">
+                                        Category Support
+                                    </a>
+                                </li>
+                                                    </ul>
+                                                </div>
+            &nbsp;
+        </nav>
+
+        <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                        <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+                <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+                <a href="http://pelias.github.io/pelias/">Pelias</a>
+            </nav>
+
+
+                        
+            <div class="wy-nav-content">
+                <div class="rst-content">
+                    <div role="main" class="document">
+                        <h2 id="interpolation">Interpolation</h2>
+<p>This document outlines a proposal for refactoring how street addresses are stored and retrieved in Pelias.</p>
+<blockquote>
+<p>An introduction to addresses in Pelias can be found in: <a href="https://github.com/pelias/pelias/wiki/Interpolation:-introduction">https://github.com/pelias/pelias/wiki/Interpolation:-introduction</a></p>
+</blockquote>
+<p>The strategic goals of the work are:</p>
+<ul>
+<li>Ensuring every street in Openstreetmap is indexed and retrievable.</li>
+<li>Supporting address ranges as provided by Openstreetmap, TIGER, et al.</li>
+<li>Combining and de-duplicating distinct address point data sets.</li>
+<li>Designing the system to scale beyond 1B address points.</li>
+<li>Allow room for future extension / improvements.</li>
+</ul>
+<p>These changes will allow for the following user experience improvements:</p>
+<ul>
+<li>Provide house number interpolation where address range data exists.</li>
+<li>Fall back to providing a street centroid in lieu of a satisfactory house number.</li>
+<li>Reduce noise by only showing a maximum of one result per street.</li>
+</ul>
+<h3 id="source-data">Source data</h3>
+<p>The work requires a conflated <code>road network</code> dataset and one or more <code>house number</code> datasets in order to function. Additional house number data sets will improve the coverage and accuracy of the system.</p>
+<blockquote>
+<p>The problem of conflation is outlined in more detail in: <a href="https://github.com/pelias/pelias/wiki/Interpolation:-conflation">https://github.com/pelias/pelias/wiki/Interpolation:-conflation</a></p>
+</blockquote>
+<h3 id="road-network">Road network</h3>
+<p>It is essential to have a pre-processed and conflated road network in order to:</p>
+<ul>
+<li>Reduce / avoid duplicate street names in results.</li>
+<li>Provide line strings which can act as interpolation guides.</li>
+<li>Ensure that interpolated points do not lie in a driving hazard.</li>
+</ul>
+<p>Three strategies for conflating the OSM road network were considered:</p>
+<ul>
+<li>Create a new system to conflate the OSM ways <em>- too time consuming and error prone</em>.</li>
+<li>Extract data from vector tiles <em>- not appropriate due to file size optimizations and entity merging</em>.</li>
+<li>Utilize the routing graph <em>- similar domain, not concerned with any entities except roads</em>.</li>
+</ul>
+<h4 id="exporting-the-valhalla-routing-graph">Exporting the Valhalla routing graph</h4>
+<p><img src="http://i.stack.imgur.com/JrBdQ.png" alt="generic graph image" /></p>
+<p>Valhalla doesn't store OSM ways, it breaks up the source data in to a graph of 'edges'. Each edge is marked up with <a href="https://gist.github.com/missinglink/b2ac67f51d132b591868a9ef60061c43">meta data such as this</a>.</p>
+<p>By <a href="https://github.com/valhalla/tools/issues/60">iterating over all the tiles</a> we can walk the graph and join adjacent road segments with the same name.</p>
+<p>The process would take around 2 hours and would produce a dump file containing:</p>
+<ul>
+<li>a single continuous line string representing the geometry of the road</li>
+<li>the street name</li>
+<li>(optionally) meta data about the street such as direction</li>
+<li>(optionally) a centroid value for the street</li>
+</ul>
+<p><strong>note:</strong> the algorithm will favour the longest contiguous path, in the case of disjoined streets and geometries that cannot be represented using a single line; a second line will be produced with the same street name.</p>
+<p>Future work can be planned in v2 to:</p>
+<ul>
+<li>Improve the name matching algorithm.</li>
+<li>Reduce the amount of duplicate line segments produced.</li>
+<li>Break line strings on geographic / political boundaries.</li>
+</ul>
+<h3 id="point-data">Point data</h3>
+<p><img src="http://wiki.openstreetmap.org/w/images/f/f2/Housenumber_example_kms_2.png" alt="generic house number image" /></p>
+<p>Point data from Openstreetmap and OpenAddresses will need to be associated to the correct segment of the road network (a single entry from the dump above).</p>
+<p>Given only a lat/lon pair and a street name, the system must be able to quickly find the appropriate road network segment and retrieve a unique ID representing it.</p>
+<p>As above, the quality of the street normalization and spelling error detection will affect the quality of the matching algorithm.</p>
+<p>The house number point should then be <a href="http://stackoverflow.com/questions/10301001/perpendicular-on-a-line-segment-from-a-given-point">projected on the line string</a>, this will give us a new point which is guaranteed to lie on the line string.</p>
+<p>The projected point data is saved along with the original position, one will be used for exact matches while the other will provide interpolation data.</p>
+<h3 id="range-data">Range data</h3>
+<p><img src="http://missinglink.embed.s3.amazonaws.com/osm-interpolation-tag.png" alt="range" /></p>
+<p>Range data from Openstreetmap and TIGER will also need to be associated to the correct segment of the road network.</p>
+<blockquote>
+<p>Information about available ranges is outlined in more detail in: <a href="https://github.com/pelias/pelias/wiki/Interpolation:-existing-standards">https://github.com/pelias/pelias/wiki/Interpolation:-existing-standards</a></p>
+</blockquote>
+<p>There is a performance vs. index size tradeoff that can be made here, either the range data can be 'expanded' at index time or at query time. It seems that query time expansion of ranges would be preferable as it keeps the index smaller and allows behavioural modifications without a full reindex.</p>
+<p>Judging by the tag statistics in the link above we will get much more value from supporting <code>addr:interpolation:*</code> tags than TIGER <code>from_address_right</code> etc tags. I would recommend not supporting TIGER tags in the v1 work.</p>
+<p>The OSM interpolation tags simply join two of the points mentioned above, so importing these ranges is very easy, simply associate them to the same road network as the child points, no further project need be performed at this time.</p>
+<h3 id="importing-in-to-pelias">Importing in to Pelias</h3>
+<p>Pelias will require an import of one document per line string in the road network, this will be in the ten-of-millions.</p>
+<p>This data should be imported in to a new layer, named <code>street</code> which distinguishes it from <code>address</code> and <code>venue</code> data.</p>
+<p>Each record will require a centroid, if one is not provided in the source data then it will need to be computed.</p>
+<p>The line strings should not be stored in Elasticsearch, they have the potential to be very large (10's of GB).</p>
+<h3 id="query-logic">Query logic</h3>
+<pre><code>Can we determine candidate street(s) based on the input test?
+[no] Fail
+
+Did the user provide a house number in the query?
+[no] Return the street centroid
+
+Do we have point data for the requested house number?
+[yes] Return the exact position
+
+Do we have an address range encompassing the requested house number?
+[yes] Return the interpolated position
+[no] Return the street centroid</code></pre>
+                    </div>
+
+                    <hr/>
+                    <div class="blue-alert">
+                            <div style="float: left; padding-right: 10px">
+                                <i class="fa fa-exclamation-triangle fa-3x"></i>
+                            </div>
+                            <div style="float: left;">
+                            <strong>
+                                See an error in this documentation?
+                            </strong>
+                            <br>Kindly submit a pull request to <a href="https://github.com/pelias/pelias">Pelias</a> or open an issue <a href="https://github.com/pelias/pelias/issues">here</a> and we'll fix it.
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+
+
+
+                    <footer>
+                        <small>
+                            <a href="http://pelias.io">Pelias</a> is a free open source project by <a href="https://mapzen.com">Mapzen</a>. This documentation was built using <a href="http://couscous.io/">Couscous</a> using a <a href="https://github.com/CouscousPHP/Template-ReadTheDocs">theme</a> inspired by <a href="https://readthedocs.org/">Read the Docs</a> and further enhanced by <a href="https://github.com/snipe/snipe-it/tree/documentation">Snipe-IT</a>.
+                        </small>
+                    </footer>
+
+                </div>
+            </div>
+
+        </section>
+
+    </div>
+
+    <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/highlight.min.js"></script>
+    <script src="http://pelias.github.io/pelias/js/theme.js"></script>
+    <script type="text/javascript" src="http://pelias.github.io/pelias/js/generated-toc.js">
+
+    <script>
+        $(function() {
+            // Syntax highlighting
+            hljs.initHighlightingOnLoad();
+        });
+    </script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+
+    
+
+
+
+</body>
+</html>

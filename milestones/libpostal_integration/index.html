@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pelias</title>
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+    <link href='https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic|Roboto+Slab:400,700|Inconsolata:400,700&subset=latin,cyrillic' rel='stylesheet' type='text/css'>
+
+    <link rel="stylesheet" href="http://pelias.github.io/pelias/css/theme.css" type="text/css"/>
+    <link rel="stylesheet" href="http://pelias.github.io/pelias/css/theme-fixes.css" type="text/css"/>
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/github.min.css">
+
+    <link href="//fonts.googleapis.com/css?family=Open+Sans:300,400" rel="stylesheet">
+    <link href="http://pelias.github.io/pelias/css/tipuesearch.css" rel="stylesheet">
+
+    
+</head>
+<body class="wy-body-for-nav">
+
+    <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+            <div class="wy-side-nav-search">
+                <a href="http://pelias.github.io/pelias/"><i class="fa fa-home"></i> Pelias</a>
+            </div>
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                
+                                
+                                                                                                                
+                                            <p class="menu-section">
+                            
+                        </p>
+
+                        <ul class="nav nav-pills nav-stacked">
+                                                            <li class="navitems">
+                                    <a href="http://pelias.github.io/pelias/index.html">
+                                        Overview
+                                    </a>
+                                </li>
+                                                            <li class="navitems">
+                                    <a href="http://pelias.github.io/pelias/install.html">
+                                        Getting Started
+                                    </a>
+                                </li>
+                                                            <li class="navitems">
+                                    <a href="http://pelias.github.io/pelias/data_licenses.html">
+                                        License
+                                    </a>
+                                </li>
+                                                            <li class="navitems">
+                                    <a href="http://pelias.github.io/pelias/code_of_conduct.html">
+                                        Code of Conduct
+                                    </a>
+                                </li>
+                                                            <li class="navitems">
+                                    <a href="http://pelias.github.io/pelias/contributing.html">
+                                        Contribute
+                                    </a>
+                                </li>
+                                                    </ul>
+                                            <p class="menu-section">
+                            #Goals
+                        </p>
+
+                        <ul class="nav nav-pills nav-stacked">
+                                                            <li class="navitems">
+                                    <a href="http://pelias.github.io/pelias/quarterly_goals">
+                                        Q3-2016 Milestones
+                                    </a>
+                                </li>
+                                                            <li class="navitems">
+                                    <a href="http://pelias.github.io/pelias/quarterly_goals/q2-2016.html">
+                                        Q2-2016 Milestones
+                                    </a>
+                                </li>
+                                                            <li class="navitems">
+                                    <a href="http://pelias.github.io/pelias/milestones/libpostal_integration">
+                                        Address Parsing w/ libpostal
+                                    </a>
+                                </li>
+                                                            <li class="navitems">
+                                    <a href="http://pelias.github.io/pelias/milestones/interpolation">
+                                        Interpolation
+                                    </a>
+                                </li>
+                                                            <li class="navitems">
+                                    <a href="http://pelias.github.io/pelias/milestones/wof_venues_import">
+                                        WOF Venues Import
+                                    </a>
+                                </li>
+                                                            <li class="navitems">
+                                    <a href="http://pelias.github.io/pelias/milestones/community_building">
+                                        Community Building
+                                    </a>
+                                </li>
+                                                            <li class="navitems">
+                                    <a href="http://pelias.github.io/pelias/milestones/categories">
+                                        Category Support
+                                    </a>
+                                </li>
+                                                    </ul>
+                                                </div>
+            &nbsp;
+        </nav>
+
+        <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                        <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+                <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+                <a href="http://pelias.github.io/pelias/">Pelias</a>
+            </nav>
+
+
+                        
+            <div class="wy-nav-content">
+                <div class="rst-content">
+                    <div role="main" class="document">
+                        <h1 id="address-parsing-aka-libpostal-integration">Address Parsing (aka libpostal integration)</h1>
+<p><a href="https://github.com/issues?utf8=%E2%9C%93&amp;q=is%3Aopen+user%3Apelias+milestone%3A%22Address+Parsing%22">Track Milestone Here</a></p>
+<h2 id="overview">Overview</h2>
+<p>Pelias currently uses the <code>addressit</code> module to parse incoming query text and break it into corresponding parts where appropriate. This module presents many issues, the main one being that it is not internationalization-friendly. It does marginally well with US and CA addresses, but fairs poorly when confronted with addresses from RU or DE to name a few.</p>
+<p>The libpostal module, written by Al Barentine, does phenomenally well across the world and is ready for integration with Pelias. The goal of this milestone is to incorporate the libpostal module into the API query processing workflow and then take advantage of the parsed out parts of the query to improve our query logic.</p>
+<p>See <a href="proposal">proposal document</a> for background and additional details.</p>
+<h2 id="external-dependencies">External Dependencies</h2>
+<p>Heavily depending on the <a href="https://github.com/openvenues/libpostal">libpostal</a> module which is developed by Al Barentine under the <a href="https://github.com/openvenues">openvenues</a> project.</p>
+<h2 id="functionality">Functionality</h2>
+<ul>
+<li>[ ] Refactor the address parsing component out of API to allow us to easily swap out parsing logic.</li>
+<li>[ ] Replace <code>addressit</code> with <code>libpostal</code> in the API.</li>
+<li>[ ] Update query logic to accept specific address parts in the query instead of always relying on the <code>name</code> property.</li>
+<li>[ ] Allow query logic to fallback to admin areas where an exact address has not been located.</li>
+<li>[ ] Replace query bulding code in API to use the new more specific query logic.</li>
+<li>[ ] When multiple records match the query, the results should be sorted by a combination of population/popularity and distance from focus point where either of those data points exist.</li>
+<li>[ ] Decide how this will impact the <code>size</code> parameter, since we will often return only a single result, while the user might ask for 10 or more.</li>
+<li>[ ] Support ambiguous cases where the query matches areas of different types, e.g. <code>Ontario</code>. Sorting of results should follow the same rules as all other queries.</li>
+<li>[ ] Add a new property to each record in results to indicate the level of accuracy represented. <strong><em>Possibly only do this for address queries???</em></strong> They should be set as follows. Fill in others for each additional admin type if applicable.</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>value</th>
+<th>conditions</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>exact_addr</td>
+<td>exact address found</td>
+</tr>
+<tr>
+<td>fallback_locality</td>
+<td>address not found, fallback to locality</td>
+</tr>
+<tr>
+<td>fallback_region</td>
+<td>address (and possibly locality) not found, fallback to region</td>
+</tr>
+<tr>
+<td>fallback_country</td>
+<td>nothing more granular found, fallback to country</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>[ ] When nothing has been found using this new strategy, attempt a query using the old query logic approach and evaluate if results are reasonable. This can be tricky, so we should first consider how often this will get called. This will be particularly important in order to accommodate for misspelled queries, since the proposed implementation will typically not handle these cases correctly.</li>
+</ul>
+<h2 id="operations">Operations</h2>
+<ul>
+<li>[ ] Add libpostal installation to existing Chef scripts. <a href="pelias/pelias#373">issue</a></li>
+</ul>
+<h2 id="documentation">Documentation</h2>
+<p>Add a brand new documentation page devoted to the fallback mechanism. This is a new feature and significantly impacts results. Sweep all existing documentation to ensure all result examples are up-to-date, as many will have drastically changed for the better. There will be times when only a single result will be returned.</p>
+<p>Update the section describing the <code>size</code> parameter to indicate that there will often be only 1 result and occasionally 0 results, even if the size is set to a larger number. The size will reflect the maximum number of results to return.</p>
+<h2 id="validation">Validation</h2>
+<ul>
+<li>[ ] Publish the results of benchmark / load-test execution and make scaling recommendations.</li>
+<li>[ ] Update / add acceptance tests to validate that the all required functionality has been implemented successfully.</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>input query</th>
+<th>expected result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>30 W 26th St</td>
+<td>many exact matches from various cities in USA)</td>
+</tr>
+<tr>
+<td>30 W 26th St, New York, NY</td>
+<td>single exact match (with possiblity of duplicate)</td>
+</tr>
+<tr>
+<td>Ontario</td>
+<td>all the Ontario's from all the countries</td>
+</tr>
+<tr>
+<td>text=Ontario&amp;boundary.country=USA</td>
+<td>only Ontario's from USA</td>
+</tr>
+<tr>
+<td>Ontario, USA</td>
+<td>only Ontario's from USA</td>
+</tr>
+<tr>
+<td>FooBlah, New York</td>
+<td>fallback to New York, make sure accuracy level is set to <code>fallback_locality</code> or <code>fallback_region</code> depending on which one is being returned</td>
+</tr>
+<tr>
+<td>Paris</td>
+<td>results should be sorted according to population</td>
+</tr>
+<tr>
+<td>Whole Foods, New York</td>
+<td>results should be only venues from New York area</td>
+</tr>
+<tr>
+<td>add more here...</td>
+<td>please :)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="future-work">Future Work</h2>
+<ul>
+<li>[ ] Update autocomplete to support the same query parsing and building logic.</li>
+</ul>
+                    </div>
+
+                    <hr/>
+                    <div class="blue-alert">
+                            <div style="float: left; padding-right: 10px">
+                                <i class="fa fa-exclamation-triangle fa-3x"></i>
+                            </div>
+                            <div style="float: left;">
+                            <strong>
+                                See an error in this documentation?
+                            </strong>
+                            <br>Kindly submit a pull request to <a href="https://github.com/pelias/pelias">Pelias</a> or open an issue <a href="https://github.com/pelias/pelias/issues">here</a> and we'll fix it.
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+
+
+
+                    <footer>
+                        <small>
+                            <a href="http://pelias.io">Pelias</a> is a free open source project by <a href="https://mapzen.com">Mapzen</a>. This documentation was built using <a href="http://couscous.io/">Couscous</a> using a <a href="https://github.com/CouscousPHP/Template-ReadTheDocs">theme</a> inspired by <a href="https://readthedocs.org/">Read the Docs</a> and further enhanced by <a href="https://github.com/snipe/snipe-it/tree/documentation">Snipe-IT</a>.
+                        </small>
+                    </footer>
+
+                </div>
+            </div>
+
+        </section>
+
+    </div>
+
+    <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/highlight.min.js"></script>
+    <script src="http://pelias.github.io/pelias/js/theme.js"></script>
+    <script type="text/javascript" src="http://pelias.github.io/pelias/js/generated-toc.js">
+
+    <script>
+        $(function() {
+            // Syntax highlighting
+            hljs.initHighlightingOnLoad();
+        });
+    </script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+
+    
+
+
+
+</body>
+</html>

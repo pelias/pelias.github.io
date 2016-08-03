@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pelias</title>
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+    <link href='https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic|Roboto+Slab:400,700|Inconsolata:400,700&subset=latin,cyrillic' rel='stylesheet' type='text/css'>
+
+    <link rel="stylesheet" href="http://pelias.github.io/pelias/css/theme.css" type="text/css"/>
+    <link rel="stylesheet" href="http://pelias.github.io/pelias/css/theme-fixes.css" type="text/css"/>
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/github.min.css">
+
+    <link href="//fonts.googleapis.com/css?family=Open+Sans:300,400" rel="stylesheet">
+    <link href="http://pelias.github.io/pelias/css/tipuesearch.css" rel="stylesheet">
+
+    
+</head>
+<body class="wy-body-for-nav">
+
+    <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+            <div class="wy-side-nav-search">
+                <a href="http://pelias.github.io/pelias/"><i class="fa fa-home"></i> Pelias</a>
+            </div>
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                
+                                
+                                                                                                                
+                                            <p class="menu-section">
+                            
+                        </p>
+
+                        <ul class="nav nav-pills nav-stacked">
+                                                            <li class="navitems">
+                                    <a href="http://pelias.github.io/pelias/index.html">
+                                        Overview
+                                    </a>
+                                </li>
+                                                            <li class="navitems">
+                                    <a href="http://pelias.github.io/pelias/install.html">
+                                        Getting Started
+                                    </a>
+                                </li>
+                                                            <li class="navitems">
+                                    <a href="http://pelias.github.io/pelias/data_licenses.html">
+                                        License
+                                    </a>
+                                </li>
+                                                            <li class="navitems">
+                                    <a href="http://pelias.github.io/pelias/code_of_conduct.html">
+                                        Code of Conduct
+                                    </a>
+                                </li>
+                                                            <li class="navitems">
+                                    <a href="http://pelias.github.io/pelias/contributing.html">
+                                        Contribute
+                                    </a>
+                                </li>
+                                                    </ul>
+                                            <p class="menu-section">
+                            #Goals
+                        </p>
+
+                        <ul class="nav nav-pills nav-stacked">
+                                                            <li class="navitems">
+                                    <a href="http://pelias.github.io/pelias/quarterly_goals">
+                                        Q3-2016 Milestones
+                                    </a>
+                                </li>
+                                                            <li class="navitems">
+                                    <a href="http://pelias.github.io/pelias/quarterly_goals/q2-2016.html">
+                                        Q2-2016 Milestones
+                                    </a>
+                                </li>
+                                                            <li class="navitems">
+                                    <a href="http://pelias.github.io/pelias/milestones/libpostal_integration">
+                                        Address Parsing w/ libpostal
+                                    </a>
+                                </li>
+                                                            <li class="navitems">
+                                    <a href="http://pelias.github.io/pelias/milestones/interpolation">
+                                        Interpolation
+                                    </a>
+                                </li>
+                                                            <li class="navitems">
+                                    <a href="http://pelias.github.io/pelias/milestones/wof_venues_import">
+                                        WOF Venues Import
+                                    </a>
+                                </li>
+                                                            <li class="navitems">
+                                    <a href="http://pelias.github.io/pelias/milestones/community_building">
+                                        Community Building
+                                    </a>
+                                </li>
+                                                            <li class="navitems">
+                                    <a href="http://pelias.github.io/pelias/milestones/categories">
+                                        Category Support
+                                    </a>
+                                </li>
+                                                    </ul>
+                                                </div>
+            &nbsp;
+        </nav>
+
+        <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                        <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+                <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+                <a href="http://pelias.github.io/pelias/">Pelias</a>
+            </nav>
+
+
+                        
+            <div class="wy-nav-content">
+                <div class="rst-content">
+                    <div role="main" class="document">
+                        <h1 id="wof-venues-import">WOF Venues Import</h1>
+<p><a href="https://github.com/issues?utf8=%E2%9C%93&amp;q=is%3Aopen+user%3Apelias+milestone%3A%22WOF+Venues%22">Track Milestone Here</a></p>
+<h2 id="overview">Overview</h2>
+<p>The Who's on First dataset provides a large number of venue and point of interest (POI) records. Mapzen Search should allow users to search all of those POIs. This means that the importing of these records must be added to the import pipeline. They should be updated automatically as part of the regularly scheduled weekly build. The records should include a full administrative hierarchy with respective Pelias gids for each parent. In cases where a POI had address information, a duplicate record containing only the address must be created and added to the address index.</p>
+<h2 id="external-dependencies">External Dependencies</h2>
+<p>In order for this work to be completed successfully, WOF bundles must be implemented and set up to be published with updates regularly.</p>
+<h2 id="functionality">Functionality</h2>
+<h3 id="required">Required</h3>
+<ul>
+<li>
+<p>[ ] Implement script(s) to download venue data bundles to a target machine. This will be used by engineers to set up their local development environments as well as by the ops framework to setup dev/staging/production import pipeline worker machines. :question: Determine if this should include campus records, since all airports are stored with type campus as opposed to venue. :question:</p>
+</li>
+<li>[ ] Improve WOF venue bundle generation code to build more venue bundles. Ideally this work would result in a single planet-wide bundle of venue data that can be downloaded without the use of GitLFS.</li>
+<li>[ ] Update existing WOF importer to index venue records as well as administrative areas.</li>
+<li>[ ] Update the logic that guards against invalid combinations of layers and sources parameters in queries. API should allow users to search with sources=wof&amp;layers=venue,address.
+Update existing admin lookup code to ensure that it ignores WOF venue data, even when it’s present in the data directory specified in the configuration properties.</li>
+<li>[ ] Existing chef scripts must be updated to download venue bundles prior to beginning the WOF import process.</li>
+</ul>
+<h3 id="documentation">Documentation</h3>
+<p>TBD: call out places that need to be updated with links to github markdown files</p>
+<h3 id="validation">Validation</h3>
+<ul>
+<li>[ ] Publish the results of benchmark / load-test execution and make scaling recommendations. It is possible that some additional scaling considerations might be required to support the new volume of data, as this expected to bring in an additional 10-15 million new records.</li>
+<li>[ ] Update / add acceptance tests to validate that the new venue data is getting indexed and searched as expected. The following are potential test cases. It can be assumed that all new tests would have sources=wof.</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>input text</th>
+<th>expected gid</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Statue of Liberty</td>
+<td>wof:venue:571724043</td>
+</tr>
+<tr>
+<td>laguardia</td>
+<td>wof:venue:102526001</td>
+</tr>
+<tr>
+<td>mapzen</td>
+<td>wof:venue:420573371</td>
+</tr>
+<tr>
+<td>Museum Europäischer Kulturen</td>
+<td>wof:venue:186122699</td>
+</tr>
+<tr>
+<td>Thieß</td>
+<td>wof:venue:270288293</td>
+</tr>
+<tr>
+<td>30 w 26th street <em>(future work)</em></td>
+<td>wof:address:420573371</td>
+</tr>
+<tr>
+<td>Neuer Kamp 2, Kellinghusen <em>(future work)</em></td>
+<td>wof:address:270288293</td>
+</tr>
+</tbody>
+</table>
+<h3 id="future-work">Future Work</h3>
+<ul>
+<li>[ ] Import category tags to allow searching WOF venues by category, similarly to all existing venue records. Category taxonomy and mapping info in <a href="https://github.com/pelias/categories">https://github.com/pelias/categories</a> should be used to ensure normalization across all importers.</li>
+<li>[ ] Create separate address records for each venue that has a fully specified address. This should be done in order to mimic what is currently happening in the OSM importer. The duplicated address record should have the name property set to the street address label and added to the address index, as opposed to venue. This can mirror the address duplicating code in the OSM importer and ideally result in minimal code duplication where possible.</li>
+</ul>
+                    </div>
+
+                    <hr/>
+                    <div class="blue-alert">
+                            <div style="float: left; padding-right: 10px">
+                                <i class="fa fa-exclamation-triangle fa-3x"></i>
+                            </div>
+                            <div style="float: left;">
+                            <strong>
+                                See an error in this documentation?
+                            </strong>
+                            <br>Kindly submit a pull request to <a href="https://github.com/pelias/pelias">Pelias</a> or open an issue <a href="https://github.com/pelias/pelias/issues">here</a> and we'll fix it.
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+
+
+
+                    <footer>
+                        <small>
+                            <a href="http://pelias.io">Pelias</a> is a free open source project by <a href="https://mapzen.com">Mapzen</a>. This documentation was built using <a href="http://couscous.io/">Couscous</a> using a <a href="https://github.com/CouscousPHP/Template-ReadTheDocs">theme</a> inspired by <a href="https://readthedocs.org/">Read the Docs</a> and further enhanced by <a href="https://github.com/snipe/snipe-it/tree/documentation">Snipe-IT</a>.
+                        </small>
+                    </footer>
+
+                </div>
+            </div>
+
+        </section>
+
+    </div>
+
+    <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/highlight.min.js"></script>
+    <script src="http://pelias.github.io/pelias/js/theme.js"></script>
+    <script type="text/javascript" src="http://pelias.github.io/pelias/js/generated-toc.js">
+
+    <script>
+        $(function() {
+            // Syntax highlighting
+            hljs.initHighlightingOnLoad();
+        });
+    </script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+
+    
+
+
+
+</body>
+</html>

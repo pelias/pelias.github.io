@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pelias</title>
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+    <link href='https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic|Roboto+Slab:400,700|Inconsolata:400,700&subset=latin,cyrillic' rel='stylesheet' type='text/css'>
+
+    <link rel="stylesheet" href="http://pelias.github.io/pelias/css/theme.css" type="text/css"/>
+    <link rel="stylesheet" href="http://pelias.github.io/pelias/css/theme-fixes.css" type="text/css"/>
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/github.min.css">
+
+    <link href="//fonts.googleapis.com/css?family=Open+Sans:300,400" rel="stylesheet">
+    <link href="http://pelias.github.io/pelias/css/tipuesearch.css" rel="stylesheet">
+
+    
+</head>
+<body class="wy-body-for-nav">
+
+    <div class="wy-grid-for-nav">
+
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+            <div class="wy-side-nav-search">
+                <a href="http://pelias.github.io/pelias/"><i class="fa fa-home"></i> Pelias</a>
+            </div>
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                
+                                
+                                                                                                                
+                                            <p class="menu-section">
+                            
+                        </p>
+
+                        <ul class="nav nav-pills nav-stacked">
+                                                            <li class="navitems">
+                                    <a href="http://pelias.github.io/pelias/index.html">
+                                        Overview
+                                    </a>
+                                </li>
+                                                            <li class="navitems">
+                                    <a href="http://pelias.github.io/pelias/install.html">
+                                        Getting Started
+                                    </a>
+                                </li>
+                                                            <li class="navitems">
+                                    <a href="http://pelias.github.io/pelias/data_licenses.html">
+                                        License
+                                    </a>
+                                </li>
+                                                            <li class="navitems">
+                                    <a href="http://pelias.github.io/pelias/code_of_conduct.html">
+                                        Code of Conduct
+                                    </a>
+                                </li>
+                                                            <li class="navitems">
+                                    <a href="http://pelias.github.io/pelias/contributing.html">
+                                        Contribute
+                                    </a>
+                                </li>
+                                                    </ul>
+                                            <p class="menu-section">
+                            #Goals
+                        </p>
+
+                        <ul class="nav nav-pills nav-stacked">
+                                                            <li class="navitems">
+                                    <a href="http://pelias.github.io/pelias/quarterly_goals">
+                                        Q3-2016 Milestones
+                                    </a>
+                                </li>
+                                                            <li class="navitems">
+                                    <a href="http://pelias.github.io/pelias/quarterly_goals/q2-2016.html">
+                                        Q2-2016 Milestones
+                                    </a>
+                                </li>
+                                                            <li class="navitems">
+                                    <a href="http://pelias.github.io/pelias/milestones/libpostal_integration">
+                                        Address Parsing w/ libpostal
+                                    </a>
+                                </li>
+                                                            <li class="navitems">
+                                    <a href="http://pelias.github.io/pelias/milestones/interpolation">
+                                        Interpolation
+                                    </a>
+                                </li>
+                                                            <li class="navitems">
+                                    <a href="http://pelias.github.io/pelias/milestones/wof_venues_import">
+                                        WOF Venues Import
+                                    </a>
+                                </li>
+                                                            <li class="navitems">
+                                    <a href="http://pelias.github.io/pelias/milestones/community_building">
+                                        Community Building
+                                    </a>
+                                </li>
+                                                            <li class="navitems">
+                                    <a href="http://pelias.github.io/pelias/milestones/categories">
+                                        Category Support
+                                    </a>
+                                </li>
+                                                    </ul>
+                                                </div>
+            &nbsp;
+        </nav>
+
+        <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+                        <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+                <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+                <a href="http://pelias.github.io/pelias/">Pelias</a>
+            </nav>
+
+
+                        
+            <div class="wy-nav-content">
+                <div class="rst-content">
+                    <div role="main" class="document">
+                        <h1 id="improved-address-discovery">Improved address discovery</h1>
+<p>This document dicusses address-range geocoding with Pelias in order to facilitate better address matching.</p>
+<h2 id="our-values">Our values</h2>
+<p>Pelias is a modular, open-source geocoder built on top of ElasticSearch for fast geocoding.</p>
+<p>In order to encourage external contribution <em>and</em> to ease the burden of installing and maintaining Pelias we made some early design decisions:</p>
+<ul>
+<li>It should be easy to install and require few external dependencies.</li>
+<li>It should be written in as few different programming languages as possible.</li>
+</ul>
+<p>These decisions have kept the software modular; easy to install; maintain and contribute to over the years.</p>
+<p>One of the compromises we made was not including a relational-database in our stack, if we required a PostgreSQL database containing an OpenStreetMap import, this would increase the complexity of installing, hosting and developing the software.</p>
+<p>This would also not be in-line with our vision of commoditizing geocoding, it would add significant financial costs to host and require developer time to maintain and develop, additionally it would likely focus the product around OpenStreetMap and would likely result in the domain logic handled by a variety of different tools in different languages.</p>
+<p>Javascript is the lingua franca of programming languages, we use it as much as possible, there are however one or two cases where we required another language to perform a specific task. In both cases <a href="https://github.com/pelias/pbf2json">pbf2json</a> and <a href="https://github.com/openvenues/libpostal">libpostal</a> have been wrapped in javascript bindings which required no external dependencies or compilers.</p>
+<p>We also rely on data exports provided by external parties, for example: openstreetmap, openaddresses and geonames provide 'data dumps' which contributors may utilize in their installation. libpostal likewise provides 'builds' which we can pull down and utilize.</p>
+<p>This separation of responsibility is core to our values, we consider it much more valuable to the community to have functionality externalized rather than internalized within a monolithic geocoding library.</p>
+<h3 id="address-coverage">Address coverage</h3>
+<p>At time of writing we have ~285 million address points available to search from two different data sources:</p>
+<table>
+<thead>
+<tr>
+<th>source</th>
+<th>total address points</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>openstreetmap</td>
+<td>~45M</td>
+</tr>
+<tr>
+<td>openaddresses</td>
+<td>~240M</td>
+</tr>
+</tbody>
+</table>
+<h4 id="openstreetmap">Openstreetmap</h4>
+<p>Openstreetmap is an excellent source of road network data, the coverage of street addresses is fairly complete in some countries such as Germany and the USA, however it is sparse in other countries.</p>
+<p>There is an opportunity to increase the address points coverage provided by Openstreetmap by ~20M (estimate) using interpolation tags, this is covered later in this document; however it's clear that we will not be able to source a significant amount of global addresses from OSM.</p>
+<h4 id="openaddresses">Openaddresses</h4>
+<p>The amount of data being imported from <code>openaddresses</code> is still growing, it can increase by tens of millions of of addresses per month.</p>
+<h3 id="known-issues">Known issues</h3>
+<h4 id="street-fallback">Street fallback</h4>
+<p>In the case where no matching address is found for a search, we should fall back to the road network in order to return more general information about the street in leiu of the actual address point.</p>
+<p>We do not currently do this, if an exact address is not found, we simply attempt to return another address on the same street, if no addresses exist on the street we return nothing.</p>
+<p>An example is <a href="http://www.openstreetmap.org/way/34243335">this road</a> which has street geometry but does not have any address points available.</p>
+<p>In this situation we cannot infer any numbering scheme or logically guess a number range so we will never be able to provide an exact house number.</p>
+<p>Pelias does not currently import street geometry from Openstreetmap due to the large amount of duplicate/invalid names.</p>
+<p>There is a <a href="https://github.com/pelias/openstreetmap/issues/19">ticket</a> and a <a href="https://github.com/pelias/osm-featurelist-evaluation">repository</a> dedicated to exploring the OSM features we bring in to Pelias, some extracts from that repo illustrate the issues with the data:</p>
+<blockquote>
+<p>Note: this data was taken from an NYC metro extract of records containing the highway:* tag</p>
+</blockquote>
+<pre><code>node    2708075964  Lamp Post
+node    2708075965  Lamp Post
+node    2708075966  Lamp Post
+node    2708075967  Lamp Post
+node    2708075970  Lamp Post
+node    2708075974  Lamp Post
+node    2708075976  Lamp Post
+node    2708075977  Lamp Post
+node    2708075979  Lamp Post
+node    2708075981  Lamp Post
+node    2708075982  Lamp Post
+node    2708075983  Lamp Post
+node    2708075984  Lamp Post
+node    2708075988  Lamp Post</code></pre>
+<pre><code>way 5709922 78th Street
+way 5709923 78th Street
+way 5709924 78th Street
+way 5709925 78th Street
+way 5709927 78th Street
+way 5709928 78th Street
+way 5709930 78th Street
+way 5709931 78th Street
+way 5709933 78th Street
+way 5709934 78th Street
+way 5709935 78th Street
+way 5709936 78th Street
+way 5709937 78th Street
+way 5709938 78th Street</code></pre>
+<p>More examples: <a href="https://raw.githubusercontent.com/pelias/osm-featurelist-evaluation/master/cuts/highway.text">https://raw.githubusercontent.com/pelias/osm-featurelist-evaluation/master/cuts/highway.text</a></p>
+<p>Importing this duplicate content would bloat the index and cause user experience problems.</p>
+<p>The options of solving this issue are discussed later in this document in a section called 'clustering'.</p>
+<h4 id="interpolation">Interpolation</h4>
+<p>In the case where we cannot find the exact house number <em>but</em> we know the street; we can attempt to 'infer' the position of the missing house number.</p>
+<p>Interpolation is based on numeric 'ranges' of house numbers, it's not as precise as exact locations but can greatly increase the address coverage in the search engine.</p>
+<p><img src="http://missinglink.embed.s3.amazonaws.com/tiger-interpolation-basics.png" alt="interpolation" /></p>
+<p>Interpolation can be complex due to the shape of the geometry, the offset from the road network, 'holes' in building ranges etc. This will be covered in more detail later in the document.</p>
+<p>When discussing interpolation it's important to remember that although the position returned is inexact, the value to an automobile driver is still high, in most cases guiding a driver within a ~20m of their target will allow them to visually guide themselves the rest of their way to the destination.</p>
+<p>Care must be taken in order to ensure that the destination point provided does not lie in a hazard. A naive linear interpolation between a group of points might center the destination point inside a building or water hazard, 'snapping' data to a road network should mitigate these issues.</p>
+<p>This issue is discussed in more detail later in this document in a section called 'interpolation'.</p>
+                    </div>
+
+                    <hr/>
+                    <div class="blue-alert">
+                            <div style="float: left; padding-right: 10px">
+                                <i class="fa fa-exclamation-triangle fa-3x"></i>
+                            </div>
+                            <div style="float: left;">
+                            <strong>
+                                See an error in this documentation?
+                            </strong>
+                            <br>Kindly submit a pull request to <a href="https://github.com/pelias/pelias">Pelias</a> or open an issue <a href="https://github.com/pelias/pelias/issues">here</a> and we'll fix it.
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+
+
+
+                    <footer>
+                        <small>
+                            <a href="http://pelias.io">Pelias</a> is a free open source project by <a href="https://mapzen.com">Mapzen</a>. This documentation was built using <a href="http://couscous.io/">Couscous</a> using a <a href="https://github.com/CouscousPHP/Template-ReadTheDocs">theme</a> inspired by <a href="https://readthedocs.org/">Read the Docs</a> and further enhanced by <a href="https://github.com/snipe/snipe-it/tree/documentation">Snipe-IT</a>.
+                        </small>
+                    </footer>
+
+                </div>
+            </div>
+
+        </section>
+
+    </div>
+
+    <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/highlight.min.js"></script>
+    <script src="http://pelias.github.io/pelias/js/theme.js"></script>
+    <script type="text/javascript" src="http://pelias.github.io/pelias/js/generated-toc.js">
+
+    <script>
+        $(function() {
+            // Syntax highlighting
+            hljs.initHighlightingOnLoad();
+        });
+    </script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+
+    
+
+
+
+</body>
+</html>
